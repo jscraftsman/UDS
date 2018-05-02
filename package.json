@@ -1,0 +1,16 @@
+{
+  "name": "udemydownloader",
+  "version": "1.0.0",
+  "description": "Udemy downloader",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.16.3",
+    "request": "^2.85.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Gervel Giva",
+  "license": "ISC"
+}
