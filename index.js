@@ -42,7 +42,7 @@
         order = order.replace(':', ' - ');
         order = order.replace('?', '');
         title = title.replace(':', ' - ');
-        title = title.replace('?', '');
+        title = title.replace('/', '-');
         
         let filePath = `${BASE_FOLDER}/${order} - ${title}.mp4`;
         DOWNLOAD(url, filePath, () => {

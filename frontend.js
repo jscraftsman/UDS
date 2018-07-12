@@ -1,22 +1,23 @@
 /* jshint esversion: 6 */
 
-const VERSION = 'v1.0.0';
+const VERSION = 'v1.0.1';
 const SERVER_URL = 'http://localhost:3000/extract';
 const DB_KEY = 'ud-download-active';
-
-const BUTTON_STR = {
-    START: 'Start Download',
-    STOP: 'Stop Download'
-}
-
-const DOWNLOAD_VIDEO_UI = '' +
-'<div style="position: absolute; right: 0; z-index: 9999;">' + 
-'    <button href="#" id="ud-downloader" style="height: 3em;">' + BUTTON_STR.START + '</button>' +
-'</div>' +
-'';
+const WAIT_TIME_BEFORE_DOWNLOAD = 5000;
+const MOVE_DELAY = 3000;
 
 $(() => {
     console.log('Adding Udemy downloader script...');
+
+    const BUTTON_STR = {
+        START: 'Start Download',
+        STOP: 'Stop Download'
+    }
+    const DOWNLOAD_VIDEO_UI = '' +
+    '<div style="position: absolute; right: 0; z-index: 9999;">' + 
+    '    <button href="#" id="ud-downloader" style="height: 3em;">' + BUTTON_STR.START + '</button>' +
+    '</div>' +
+    '';
 
     $('body').prepend(DOWNLOAD_VIDEO_UI);
     $('body').on('click', 'button#ud-downloader', ToggleDownloadVideo);
@@ -34,16 +35,22 @@ $(() => {
 
     function StartDownload() {
         console.log('STARTING UDEMY DOWNLOADER');
-        $(".vjs-tech")[0].pause();
-
-        let payload = createPayload();
-
-        if(payload && payload.url && localStorage[DB_KEY]) {
-            $('button#ud-downloader').text(BUTTON_STR.STOP);
-            HandleDownload(payload);
+        if($(".vjs-tech").length < 1) {
+            console.log('It seems that this page does not contain a video, moving on to the next page');
+            $("button.continue-button").first().click();
+            if (localStorage[DB_KEY]) setTimeout(StartDownload, WAIT_TIME_BEFORE_DOWNLOAD);
         } else {
-            delete localStorage[DB_KEY];
-            console.log('No URL for ' + payload.title);
+            $(".vjs-tech")[0].pause();
+
+            let payload = createPayload();
+
+            if(payload && payload.url && localStorage[DB_KEY]) {
+                $('button#ud-downloader').text(BUTTON_STR.STOP);
+                HandleDownload(payload);
+            } else {
+                delete localStorage[DB_KEY];
+                console.log('No URL for ' + payload.title);
+            }
         }
     }
 
@@ -69,8 +76,9 @@ $(() => {
         console.log('[START] Downloading video: ' + payload.title);
         $.post(SERVER_URL, payload).done((data) => {
             console.log('[DONE] Downloaded video: ' + payload.title);
+            console.log('Moving to next page...');
             $("button.continue-button").first().click();
-            setTimeout(StartDownload, 5000);
+            setTimeout(StartDownload, WAIT_TIME_BEFORE_DOWNLOAD);
         }).fail((err) => {
             console.log('[ERROR] Failed to download video: ' + payload.title);
             StopDownload();
